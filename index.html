@@ -358,7 +358,9 @@
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 for (const landmarks of results.multiFaceLandmarks) {
                     // Находим точки лица для позиционирования шапки
+                    // Используем точки для определения размера головы
                     const forehead = landmarks[10];  // точка на лбу
+                    const chin = landmarks[152];     // точка на подбородке
                     const leftTemple = landmarks[234];
                     const rightTemple = landmarks[454];
                     
@@ -366,29 +368,36 @@
                     const canvasWidth = canvas.width;
                     const canvasHeight = canvas.height;
                     
-                    let foreheadX, foreheadY, leftX, rightX;
+                    let foreheadX, foreheadY, chinY, leftX, rightX;
                     
                     if (isFrontCamera) {
                         // Для зеркального отображения инвертируем X координату
                         foreheadX = (1 - forehead.x) * canvasWidth;
                         foreheadY = forehead.y * canvasHeight;
+                        chinY = (1 - chin.y) * canvasHeight;
                         leftX = (1 - leftTemple.x) * canvasWidth;
                         rightX = (1 - rightTemple.x) * canvasWidth;
                     } else {
                         foreheadX = forehead.x * canvasWidth;
                         foreheadY = forehead.y * canvasHeight;
+                        chinY = chin.y * canvasHeight;
                         leftX = leftTemple.x * canvasWidth;
                         rightX = rightTemple.x * canvasWidth;
                     }
                     
+                    // Вычисляем размеры лица
                     const faceWidth = Math.abs(rightX - leftX);
+                    const faceHeight = Math.abs(chinY - foreheadY);
                     
-                    // Размер и позиция шапки
-                    const hatWidth = faceWidth * 1.8;
-                    const hatHeight = hatWidth * 0.67;
+                    // Размер шапки: ширина = ширина лица * 1.2 (было 1.8)
+                    // Высота рассчитывается пропорционально оригинальному изображению 750x712
+                    const originalHatRatio = 750 / 712; // ≈ 1.05
+                    const hatWidth = faceWidth * 1.2;
+                    const hatHeight = hatWidth / originalHatRatio; // Сохраняем пропорции
                     
+                    // Позиционирование шапки: выше лба
                     const hatX = foreheadX - hatWidth / 2;
-                    const hatY = foreheadY - hatHeight * 0.6;
+                    const hatY = foreheadY - hatHeight * 0.8; // Поднимаем выше (было 0.6)
                     
                     // Рисуем шапку
                     if (hatImage.complete) {
@@ -402,6 +411,15 @@
                             ctx.drawImage(hatImage, hatX, hatY, hatWidth, hatHeight);
                         }
                         ctx.restore();
+                        
+                        // Для отладки: показать контрольные точки
+                        if (false) { // поменяйте на true для отладки
+                            ctx.fillStyle = 'red';
+                            ctx.fillRect(foreheadX - 5, foreheadY - 5, 10, 10);
+                            ctx.fillStyle = 'blue';
+                            ctx.fillRect(leftX - 5, foreheadY - 5, 10, 10);
+                            ctx.fillRect(rightX - 5, foreheadY - 5, 10, 10);
+                        }
                     }
                 }
             }
@@ -561,3 +579,4 @@
     </script>
 </body>
 </html>
+
