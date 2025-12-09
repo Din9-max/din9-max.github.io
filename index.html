@@ -11,20 +11,28 @@
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Новогодние украшения -->
+    <div class="ornament"></div>
+    <div class="ornament"></div>
+    <div class="ornament"></div>
+    <div class="ornament"></div>
+    <div class="christmas-lights"></div>
+    
     <div class="start-screen" id="startScreen">
-        <h1>🎅 AR Шапка Санты</h1>
-        <p>Наденьте виртуальную шапку Санты в реальном времени!</p>
+        <div class="santa-hat-icon">🎅</div>
+        <h1>AR Santa Hat Magic</h1>
+        <p>Позвольте волшебству Нового Года окутать вас!</p>
         <div class="instructions">
-            <p>1. Нажмите "НАЧАТЬ"</p>
-            <p>2. Разрешите доступ к камере</p>
-            <p>3. Смотрите в камеру</p>
-            <p>4. Наслаждайтесь! 🎄</p>
+            <p>🎄 Нажмите "ВОЛШЕБСТВО"</p>
+            <p>📷 Разрешите доступ к камере</p>
+            <p>👀 Смотрите в камеру</p>
+            <p>✨ Наслаждайтесь праздничным чудом!</p>
         </div>
-        <button id="startMain">НАЧАТЬ</button>
+        <button id="startMain">🎁 ВОЛШЕБСТВО</button>
     </div>
     
     <div class="loading" id="loading" style="display: none;">
-        Загрузка...
+        ✨ Загружаем новогоднее чудо...
     </div>
     
     <video id="webcam" autoplay playsinline muted></video>
@@ -32,15 +40,18 @@
     
     <div class="controls" style="display: none;" id="controlsDiv">
         <div class="controls-buttons">
-            <button id="start">СТАРТ</button>
-            <button id="stop">СТОП</button>
-            <button id="switch">КАМЕРА</button>
+            <button id="start">🎬 СТАРТ</button>
+            <button id="stop">⏹ СТОП</button>
+            <button id="switch">🔄 КАМЕРА</button>
         </div>
-        <div style="font-size: 14px; opacity: 0.8;">AR Шапка Санты 🎅</div>
+        <div style="font-size: 16px; opacity: 0.9; margin-top: 10px; font-family: 'Dancing Script', cursive;">
+            С наступающим новым годом! 🎄✨
+        </div>
     </div>
-
+    
     <script src="main.js"></script>
-</body>
+    </body>
 </html>
+
 
 
