@@ -1,0 +1,191 @@
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: black;
+    touch-action: none;
+}
+
+#webcam {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); /* Зеркальное отображение для фронтальной камеры */
+}
+
+#output {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: white;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 20px 10px;
+    z-index: 10;
+}
+
+.controls-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    background: #ff0000;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    margin: 0;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 120px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+
+button:active {
+    transform: scale(0.95);
+    background: #cc0000;
+}
+
+#stop {
+    background: #333;
+}
+
+#stop:active {
+    background: #222;
+}
+
+#switch {
+    background: #0066cc;
+}
+
+#switch:active {
+    background: #0055aa;
+}
+
+.start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+.start-screen h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #ff4444;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.start-screen p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    max-width: 90%;
+    line-height: 1.5;
+}
+
+.instructions {
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 15px;
+    margin: 20px 0;
+    max-width: 90%;
+}
+
+#startMain {
+    background: linear-gradient(to right, #ff4444, #ff0000);
+    color: white;
+    border: none;
+    padding: 18px 50px;
+    font-size: 1.2em;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 6px 12px rgba(255,0,0,0.3);
+    font-weight: bold;
+}
+
+#startMain:active {
+    transform: scale(0.95);
+}
+
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 1.2em;
+    z-index: 5;
+}
+
+@media (max-width: 768px) {
+    button {
+        padding: 10px 20px;
+        min-width: 100px;
+        font-size: 14px;
+    }
+    
+    .controls {
+        padding: 15px 10px;
+    }
+    
+    .start-screen h1 {
+        font-size: 2em;
+    }
+    
+    .start-screen p {
+        font-size: 1em;
+    }
+}
+
+@media (max-height: 600px) {
+    .start-screen h1 {
+        font-size: 1.8em;
+        margin-bottom: 10px;
+    }
+    
+    .start-screen p {
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+    
+    #startMain {
+        padding: 12px 30px;
+        font-size: 1em;
+    }
+}
