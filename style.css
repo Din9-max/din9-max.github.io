@@ -1,6 +1,5 @@
-/* Подключаем красивый новогодний шрифт */
 @import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Dancing+Script:wght@400;700&display=swap');
-
+        
 * {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -19,27 +18,53 @@ body {
     font-family: 'Mountains of Christmas', cursive;
 }
 
-/* Новогодние снежинки в фоне */
-body::before {
-    content: '';
+/* Анимированный снег */
+#snowflakes {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
-        radial-gradient(circle at 10% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
-        radial-gradient(circle at 30% 40%, rgba(255,255,255,0.1) 1px, transparent 1px),
-        radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 1px, transparent 1px),
-        radial-gradient(circle at 90% 80%, rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 200px 200px;
-    animation: snow 20s linear infinite;
-    z-index: -1;
+    pointer-events: none;
+    z-index: 2;
 }
 
-@keyframes snow {
-    0% { background-position: 0 0; }
-    100% { background-position: 200px 200px; }
+.snowflake {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+
+/* Гирлянда */
+.garland {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    z-index: 3;
+}
+
+.light {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+    box-shadow: 0 0 10px currentColor;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
 }
 
 #webcam {
@@ -48,7 +73,6 @@ body::before {
     height: 100%;
     object-fit: cover;
     transform: scaleX(-1);
-    border-radius: 10px;
 }
 
 #output {
@@ -57,7 +81,6 @@ body::before {
     height: 100%;
     left: 0;
     top: 0;
-    border-radius: 10px;
 }
 
 .controls {
@@ -67,73 +90,66 @@ body::before {
     right: 0;
     text-align: center;
     color: white;
-    background: linear-gradient(to top, 
-        rgba(189, 0, 0, 0.9) 0%, 
-        rgba(139, 0, 0, 0.8) 50%, 
-        transparent 100%);
-    padding: 25px 10px 40px;
+    background: linear-gradient(to top, rgba(189, 0, 0, 0.9), transparent);
+    padding: 20px 10px 30px;
     z-index: 10;
     border-radius: 20px 20px 0 0;
     border-top: 3px solid #ffcc00;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+}
+
+.accessory-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.accessory-btn {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid #ffcc00;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-family: 'Mountains of Christmas', cursive;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.accessory-btn.active {
+    background: #ff0000;
+    transform: scale(1.1);
 }
 
 .controls-buttons {
     display: flex;
     justify-content: center;
-    gap: 15px;
-    margin-bottom: 15px;
+    gap: 10px;
+    margin-bottom: 10px;
     flex-wrap: wrap;
 }
 
 button {
-    background: linear-gradient(145deg, #ff0000, #cc0000);
+    background: #ff0000;
     color: white;
     border: none;
-    padding: 15px 30px;
+    padding: 12px 24px;
     margin: 0;
     border-radius: 50px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    min-width: 130px;
-    box-shadow: 0 6px 15px rgba(204, 0, 0, 0.4),
-                inset 0 2px 4px rgba(255,255,255,0.3);
-    transition: all 0.3s;
+    min-width: 120px;
     font-family: 'Mountains of Christmas', cursive;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
-}
-
-button::after {
-    content: '🎄';
-    position: absolute;
-    right: 10px;
-    opacity: 0.5;
-}
-
-button:active {
-    transform: scale(0.95);
-    box-shadow: 0 3px 8px rgba(204, 0, 0, 0.4);
-}
-
-#start {
-    background: linear-gradient(145deg, #00cc00, #009900);
-    box-shadow: 0 6px 15px rgba(0, 153, 0, 0.4),
-                inset 0 2px 4px rgba(255,255,255,0.3);
 }
 
 #stop {
-    background: linear-gradient(145deg, #666666, #444444);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4),
-                inset 0 2px 4px rgba(255,255,255,0.3);
+    background: #333;
 }
 
 #switch {
-    background: linear-gradient(145deg, #0066cc, #0044aa);
-    box-shadow: 0 6px 15px rgba(0, 68, 170, 0.4),
-                inset 0 2px 4px rgba(255,255,255,0.3);
+    background: #0066cc;
 }
 
 .start-screen {
@@ -142,10 +158,7 @@ button:active {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, 
-        rgba(12, 36, 97, 0.95) 0%, 
-        rgba(30, 55, 153, 0.95) 50%,
-        rgba(139, 0, 0, 0.95) 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -153,118 +166,41 @@ button:active {
     color: white;
     text-align: center;
     z-index: 100;
-    font-family: 'Mountains of Christmas', cursive;
-}
-
-.santa-hat-icon {
-    font-size: 4em;
-    margin-bottom: 10px;
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0) rotate(-5deg); }
-    50% { transform: translateY(-20px) rotate(5deg); }
+    padding: 20px;
 }
 
 .start-screen h1 {
-    font-size: 3.5em;
+    font-size: 2.5em;
     margin-bottom: 20px;
-    color: #ffcc00;
-    text-shadow: 3px 3px 6px rgba(0,0,0,0.5),
-                 0 0 20px rgba(255, 204, 0, 0.5);
-    letter-spacing: 2px;
-    position: relative;
-}
-
-.start-screen h1::after {
-    content: '🎅';
-    position: absolute;
-    right: -40px;
-    top: -10px;
-    font-size: 0.8em;
-    animation: wave 2s ease-in-out infinite;
-}
-
-@keyframes wave {
-    0%, 100% { transform: rotate(0deg); }
-    50% { transform: rotate(20deg); }
+    color: #ff4444;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .start-screen p {
-    font-size: 1.5em;
+    font-size: 1.2em;
     margin-bottom: 20px;
     max-width: 90%;
     line-height: 1.5;
-    font-family: 'Dancing Script', cursive;
 }
 
 .instructions {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 20px;
-    padding: 20px;
-    margin: 30px 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 15px;
+    margin: 20px 0;
     max-width: 90%;
-    border: 2px solid rgba(255, 204, 0, 0.3);
-    backdrop-filter: blur(10px);
-    font-family: 'Dancing Script', cursive;
-    font-size: 1.2em;
-}
-
-.instructions p {
-    margin: 10px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.instructions p::before {
-    content: '❄️';
-    font-size: 1.2em;
 }
 
 #startMain {
-    background: linear-gradient(145deg, #ff4444, #cc0000);
+    background: #ff0000;
     color: white;
     border: none;
-    padding: 20px 60px;
-    font-size: 1.8em;
+    padding: 18px 50px;
+    font-size: 1.2em;
     border-radius: 50px;
     cursor: pointer;
-    margin-top: 30px;
-    box-shadow: 0 10px 25px rgba(255, 0, 0, 0.5),
-                inset 0 3px 6px rgba(255,255,255,0.3);
-    font-weight: bold;
+    margin-top: 20px;
     font-family: 'Mountains of Christmas', cursive;
-    letter-spacing: 2px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s;
-}
-
-#startMain::before {
-    content: '✨';
-    position: absolute;
-    left: 20px;
-    animation: sparkle 1s infinite;
-}
-
-#startMain::after {
-    content: '✨';
-    position: absolute;
-    right: 20px;
-    animation: sparkle 1s infinite 0.5s;
-}
-
-@keyframes sparkle {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.2); }
-}
-
-#startMain:active {
-    transform: scale(0.95);
-    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
 }
 
 .loading {
@@ -273,110 +209,17 @@ button:active {
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-size: 1.5em;
+    font-size: 1.2em;
     z-index: 5;
-    font-family: 'Dancing Script', cursive;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 20px 40px;
-    border-radius: 20px;
-    border: 2px solid #ffcc00;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(255, 204, 0, 0.3); }
-    50% { box-shadow: 0 0 40px rgba(255, 204, 0, 0.6); }
-}
-
-/* Новогодние украшения */
-.ornament {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: radial-gradient(circle at 30% 30%, #ff0000, #cc0000);
-    border-radius: 50%;
-    animation: swing 5s ease-in-out infinite;
-    z-index: 1;
-}
-
-.ornament:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
-.ornament:nth-child(2) { top: 20%; right: 10%; animation-delay: 1s; background: radial-gradient(circle at 30% 30%, #00cc00, #009900); }
-.ornament:nth-child(3) { bottom: 30%; left: 15%; animation-delay: 2s; background: radial-gradient(circle at 30% 30%, #0066cc, #0044aa); }
-.ornament:nth-child(4) { bottom: 15%; right: 5%; animation-delay: 3s; background: radial-gradient(circle at 30% 30%, #ffcc00, #ff9900); }
-
-@keyframes swing {
-    0%, 100% { transform: rotate(-10deg); }
-    50% { transform: rotate(10deg); }
-}
-
-.christmas-lights {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 20px,
-        #ff0000 20px,
-        #ff0000 40px,
-        #00ff00 40px,
-        #00ff00 60px,
-        #ffff00 60px,
-        #ffff00 80px
-    );
-    animation: lights 2s linear infinite;
-}
-
-@keyframes lights {
-    0% { background-position: 0 0; }
-    100% { background-position: 80px 0; }
 }
 
 @media (max-width: 768px) {
-    button {
-        padding: 12px 25px;
-        min-width: 110px;
-        font-size: 16px;
+    button, .accessory-btn {
+        padding: 10px 20px;
+        font-size: 14px;
     }
     
     .controls {
-        padding: 20px 10px 35px;
-    }
-    
-    .start-screen h1 {
-        font-size: 2.5em;
-    }
-    
-    .start-screen p {
-        font-size: 1.2em;
-    }
-    
-    #startMain {
-        padding: 15px 40px;
-        font-size: 1.5em;
-    }
-}
-
-@media (max-height: 600px) {
-    .start-screen h1 {
-        font-size: 2em;
-        margin-bottom: 10px;
-    }
-    
-    .start-screen p {
-        font-size: 1em;
-        margin-bottom: 10px;
-    }
-    
-    #startMain {
-        padding: 12px 30px;
-        font-size: 1.2em;
-    }
-    
-    .instructions {
-        margin: 15px 0;
-        padding: 15px;
+        padding: 15px 10px 25px;
     }
 }
