@@ -46,13 +46,53 @@
             border-radius: 5px;
             font-size: 16px;
         }
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            z-index: 100;
+        }
+        .start-screen h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .start-screen p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            max-width: 80%;
+        }
+        #startMain {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div class="start-screen" id="startScreen">
+        <h1>🎅 AR Шапка Санты</h1>
+        <p>Наденьте виртуальную шапку Санты в реальном времени!</p>
+        <p>Для работы приложения требуется доступ к камере.</p>
+        <button id="startMain">НАЧАТЬ</button>
+    </div>
+    
     <video id="webcam" autoplay playsinline></video>
     <canvas id="output" width="1280" height="720"></canvas>
     
-    <div class="controls">
+    <div class="controls" style="display: none;" id="controlsDiv">
         <button id="start">СТАРТ</button>
         <button id="stop">СТОП</button>
         <button id="switch">ПЕРЕКЛЮЧИТЬ КАМЕРУ</button>
@@ -67,15 +107,33 @@
         const startButton = document.getElementById('start');
         const stopButton = document.getElementById('stop');
         const switchButton = document.getElementById('switch');
+        const startScreen = document.getElementById('startScreen');
+        const controlsDiv = document.getElementById('controlsDiv');
+        const startMainButton = document.getElementById('startMain');
         
         let currentStream;
+        let isRunning = false;
+        let cameraInstance = null;
+        
+        // Создаем изображение шапки
         let hatImage = new Image();
         hatImage.src = 'data:image/svg+xml;base64,' + btoa(`
             <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="150" cy="50" rx="120" ry="50" fill="red"/>
-                <rect x="30" y="50" width="240" height="100" fill="darkred"/>
+                <defs>
+                    <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:#ff0000;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#cc0000;stop-opacity:1" />
+                    </radialGradient>
+                    <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:#8b0000;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#660000;stop-opacity:1" />
+                    </radialGradient>
+                </defs>
+                <ellipse cx="150" cy="50" rx="120" ry="50" fill="url(#grad1)"/>
+                <rect x="30" y="50" width="240" height="100" fill="url(#grad2)"/>
                 <rect x="30" y="130" width="240" height="20" fill="white"/>
                 <circle cx="150" cy="30" r="20" fill="white"/>
+                <circle cx="150" cy="30" r="15" fill="#ffcc00"/>
             </svg>
         `);
         
@@ -116,12 +174,16 @@
                 
                 return new Promise((resolve) => {
                     video.onloadedmetadata = () => {
+                        // Устанавливаем размер canvas под размер видео
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
                         resolve();
                     };
                 });
             } catch (err) {
                 console.error("Ошибка камеры:", err);
-                alert("Не удалось получить доступ к камере");
+                alert("Не удалось получить доступ к камере. Пожалуйста, разрешите доступ к камере в настройках браузера.");
+                return Promise.reject(err);
             }
         }
         
@@ -133,7 +195,7 @@
             // Рисуем видео
             ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
             
-            if (results.multiFaceLandmarks) {
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 for (const landmarks of results.multiFaceLandmarks) {
                     // Находим точки лица для позиционирования шапки
                     const forehead = landmarks[10];  // точка на лбу
@@ -157,7 +219,7 @@
                     const hatHeight = hatWidth * 0.67;
                     
                     const hatX = foreheadX - hatWidth / 2;
-                    const hatY = foreheadY - hatHeight;
+                    const hatY = foreheadY - hatHeight * 0.7;
                     
                     // Рисуем шапку
                     if (hatImage.complete) {
@@ -169,40 +231,105 @@
             ctx.restore();
         }
         
+        // Функция для запуска обработки
+        async function startProcessing() {
+            if (!isRunning) {
+                isRunning = true;
+                startButton.textContent = "ПАУЗА";
+                
+                if (!cameraInstance) {
+                    cameraInstance = new Camera(video, {
+                        onFrame: async () => {
+                            await faceMesh.send({image: video});
+                        },
+                        width: canvas.width,
+                        height: canvas.height
+                    });
+                    await cameraInstance.start();
+                }
+            }
+        }
+        
+        // Функция для остановки обработки
+        function stopProcessing() {
+            if (isRunning) {
+                isRunning = false;
+                startButton.textContent = "СТАРТ";
+                if (cameraInstance) {
+                    cameraInstance.stop();
+                    cameraInstance = null;
+                }
+            }
+        }
+        
         // Обработчики кнопок
+        startMainButton.onclick = async () => {
+            try {
+                // Скрываем стартовый экран
+                startScreen.style.display = 'none';
+                controlsDiv.style.display = 'block';
+                
+                // Запускаем камеру
+                await startCamera();
+                
+                // Запускаем обработку
+                await startProcessing();
+            } catch (err) {
+                // Если ошибка - показываем стартовый экран снова
+                startScreen.style.display = 'flex';
+                controlsDiv.style.display = 'none';
+            }
+        };
+        
         startButton.onclick = async () => {
-            await startCamera();
-            await faceMesh.send({image: video});
+            if (isRunning) {
+                stopProcessing();
+            } else {
+                await startProcessing();
+            }
         };
         
         stopButton.onclick = () => {
+            stopProcessing();
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Показываем стартовый экран
+            startScreen.style.display = 'flex';
+            controlsDiv.style.display = 'none';
+            isRunning = false;
         };
         
         switchButton.onclick = async () => {
-            const facingMode = video.srcObject ?
-                (video.srcObject.getVideoTracks()[0].getSettings().facingMode === 'user' ?
-                    'environment' : 'user') : 'user';
-            await startCamera(facingMode);
+            try {
+                const facingMode = currentStream ?
+                    (currentStream.getVideoTracks()[0].getSettings().facingMode === 'user' ?
+                        'environment' : 'user') : 'user';
+                
+                // Останавливаем текущую обработку
+                stopProcessing();
+                
+                // Переключаем камеру
+                await startCamera(facingMode);
+                
+                // Запускаем обработку снова
+                await startProcessing();
+            } catch (err) {
+                console.error("Ошибка при переключении камеры:", err);
+                alert("Не удалось переключить камеру");
+            }
         };
         
-        // Запускаем обработку кадров
-        const camera = new Camera(video, {
-            onFrame: async () => {
-                await faceMesh.send({image: video});
-            },
-            width: 1280,
-            height: 720
-        });
-        
-        // Автозапуск при загрузке
-        window.onload = async () => {
-            await startCamera();
-            camera.start();
+        // Обработка ошибок загрузки изображения шапки
+        hatImage.onerror = () => {
+            console.error("Ошибка загрузки изображения шапки");
         };
+        
+        // Убираем автозапуск при загрузке
+        // Теперь камера запускается только по нажатию кнопки
     </script>
 </body>
 </html>
