@@ -2,12 +2,20 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AR Santa Hat</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
     <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
         body {
             margin: 0;
             padding: 0;
@@ -15,44 +23,88 @@
             height: 100vh;
             overflow: hidden;
             background: black;
+            touch-action: none;
         }
+        
         #webcam {
             position: absolute;
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transform: scaleX(-1); /* Зеркальное отображение для фронтальной камеры */
         }
+        
         #output {
             position: absolute;
             width: 100%;
             height: 100%;
+            left: 0;
+            top: 0;
         }
+        
         .controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 0;
             left: 0;
             right: 0;
             text-align: center;
             color: white;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 20px 10px;
+            z-index: 10;
         }
+        
+        .controls-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
         button {
             background: #ff0000;
             color: white;
             border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            border-radius: 5px;
+            padding: 12px 24px;
+            margin: 0;
+            border-radius: 50px;
             font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 120px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.2s;
         }
+        
+        button:active {
+            transform: scale(0.95);
+            background: #cc0000;
+        }
+        
+        #stop {
+            background: #333;
+        }
+        
+        #stop:active {
+            background: #222;
+        }
+        
+        #switch {
+            background: #0066cc;
+        }
+        
+        #switch:active {
+            background: #0055aa;
+        }
+        
         .start-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -60,24 +112,93 @@
             color: white;
             text-align: center;
             z-index: 100;
+            padding: 20px;
         }
+        
         .start-screen h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
+            color: #ff4444;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
+        
         .start-screen p {
             font-size: 1.2em;
-            margin-bottom: 30px;
-            max-width: 80%;
+            margin-bottom: 20px;
+            max-width: 90%;
+            line-height: 1.5;
         }
+        
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            max-width: 90%;
+        }
+        
         #startMain {
-            background: #ff0000;
+            background: linear-gradient(to right, #ff4444, #ff0000);
             color: white;
             border: none;
-            padding: 15px 40px;
+            padding: 18px 50px;
             font-size: 1.2em;
-            border-radius: 10px;
+            border-radius: 50px;
             cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 6px 12px rgba(255,0,0,0.3);
+            font-weight: bold;
+        }
+        
+        #startMain:active {
+            transform: scale(0.95);
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2em;
+            z-index: 5;
+        }
+        
+        @media (max-width: 768px) {
+            button {
+                padding: 10px 20px;
+                min-width: 100px;
+                font-size: 14px;
+            }
+            
+            .controls {
+                padding: 15px 10px;
+            }
+            
+            .start-screen h1 {
+                font-size: 2em;
+            }
+            
+            .start-screen p {
+                font-size: 1em;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .start-screen h1 {
+                font-size: 1.8em;
+                margin-bottom: 10px;
+            }
+            
+            .start-screen p {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+            
+            #startMain {
+                padding: 12px 30px;
+                font-size: 1em;
+            }
         }
     </style>
 </head>
@@ -85,18 +206,29 @@
     <div class="start-screen" id="startScreen">
         <h1>🎅 AR Шапка Санты</h1>
         <p>Наденьте виртуальную шапку Санты в реальном времени!</p>
-        <p>Для работы приложения требуется доступ к камере.</p>
+        <div class="instructions">
+            <p>1. Нажмите "НАЧАТЬ"</p>
+            <p>2. Разрешите доступ к камере</p>
+            <p>3. Смотрите в камеру</p>
+            <p>4. Наслаждайтесь! 🎄</p>
+        </div>
         <button id="startMain">НАЧАТЬ</button>
     </div>
     
-    <video id="webcam" autoplay playsinline></video>
-    <canvas id="output" width="1280" height="720"></canvas>
+    <div class="loading" id="loading" style="display: none;">
+        Загрузка...
+    </div>
+    
+    <video id="webcam" autoplay playsinline muted></video>
+    <canvas id="output"></canvas>
     
     <div class="controls" style="display: none;" id="controlsDiv">
-        <button id="start">СТАРТ</button>
-        <button id="stop">СТОП</button>
-        <button id="switch">ПЕРЕКЛЮЧИТЬ КАМЕРУ</button>
-        <div>AR Шапка Санты - Работает в браузере!</div>
+        <div class="controls-buttons">
+            <button id="start">СТАРТ</button>
+            <button id="stop">СТОП</button>
+            <button id="switch">КАМЕРА</button>
+        </div>
+        <div style="font-size: 14px; opacity: 0.8;">AR Шапка Санты 🎅</div>
     </div>
 
     <script>
@@ -110,10 +242,13 @@
         const startScreen = document.getElementById('startScreen');
         const controlsDiv = document.getElementById('controlsDiv');
         const startMainButton = document.getElementById('startMain');
+        const loading = document.getElementById('loading');
         
         let currentStream;
         let isRunning = false;
         let cameraInstance = null;
+        let isFrontCamera = true;
+        let animationId = null;
         
         // Создаем изображение шапки
         let hatImage = new Image();
@@ -135,21 +270,30 @@
         
         faceMesh.onResults(onResults);
         
-        // Функция для начала работы с камерой
+        // Функция для настройки камеры под мобильные устройства
         async function startCamera(facingMode = 'user') {
             try {
                 if (currentStream) {
                     currentStream.getTracks().forEach(track => track.stop());
                 }
                 
+                // Определяем поддерживаемые размеры
                 const constraints = {
                     video: {
                         facingMode: facingMode,
                         width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        height: { ideal: 720 },
+                        frameRate: { ideal: 30 }
                     },
                     audio: false
                 };
+                
+                // Для мобильных устройств используем оптимальные настройки
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    constraints.video.width = { ideal: 640 };
+                    constraints.video.height = { ideal: 480 };
+                    constraints.video.frameRate = { ideal: 24 };
+                }
                 
                 currentStream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = currentStream;
@@ -157,8 +301,33 @@
                 return new Promise((resolve) => {
                     video.onloadedmetadata = () => {
                         // Устанавливаем размер canvas под размер видео
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
+                        const videoWidth = video.videoWidth;
+                        const videoHeight = video.videoHeight;
+                        
+                        // Для мобильных устройств подгоняем под экран
+                        if (window.innerHeight > window.innerWidth) {
+                            // Портретная ориентация
+                            canvas.width = Math.min(videoWidth, window.innerWidth);
+                            canvas.height = canvas.width * (videoHeight / videoWidth);
+                        } else {
+                            // Ландшафтная ориентация
+                            canvas.width = window.innerWidth;
+                            canvas.height = window.innerHeight;
+                        }
+                        
+                        // Центрируем canvas
+                        canvas.style.width = '100%';
+                        canvas.style.height = '100%';
+                        canvas.style.objectFit = 'cover';
+                        
+                        // Настраиваем зеркальное отображение для фронтальной камеры
+                        if (facingMode === 'user') {
+                            video.style.transform = 'scaleX(-1)';
+                        } else {
+                            video.style.transform = 'scaleX(1)';
+                        }
+                        
+                        isFrontCamera = (facingMode === 'user');
                         resolve();
                     };
                 });
@@ -174,8 +343,17 @@
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Рисуем видео
-            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            // Рисуем видео с учетом ориентации
+            if (isFrontCamera) {
+                // Для фронтальной камеры - зеркальное отображение
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+                ctx.setTransform(1, 0, 0, 1, 0, 0); // Сбрасываем трансформацию
+            } else {
+                // Для задней камеры - как есть
+                ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            }
             
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 for (const landmarks of results.multiFaceLandmarks) {
@@ -188,29 +366,56 @@
                     const canvasWidth = canvas.width;
                     const canvasHeight = canvas.height;
                     
-                    const foreheadX = forehead.x * canvasWidth;
-                    const foreheadY = forehead.y * canvasHeight;
+                    let foreheadX, foreheadY, leftX, rightX;
                     
-                    const leftX = leftTemple.x * canvasWidth;
-                    const rightX = rightTemple.x * canvasWidth;
+                    if (isFrontCamera) {
+                        // Для зеркального отображения инвертируем X координату
+                        foreheadX = (1 - forehead.x) * canvasWidth;
+                        foreheadY = forehead.y * canvasHeight;
+                        leftX = (1 - leftTemple.x) * canvasWidth;
+                        rightX = (1 - rightTemple.x) * canvasWidth;
+                    } else {
+                        foreheadX = forehead.x * canvasWidth;
+                        foreheadY = forehead.y * canvasHeight;
+                        leftX = leftTemple.x * canvasWidth;
+                        rightX = rightTemple.x * canvasWidth;
+                    }
                     
-                    const faceWidth = rightX - leftX;
+                    const faceWidth = Math.abs(rightX - leftX);
                     
                     // Размер и позиция шапки
                     const hatWidth = faceWidth * 1.8;
                     const hatHeight = hatWidth * 0.67;
                     
                     const hatX = foreheadX - hatWidth / 2;
-                    const hatY = foreheadY - hatHeight * 0.7;
+                    const hatY = foreheadY - hatHeight * 0.6;
                     
                     // Рисуем шапку
                     if (hatImage.complete) {
-                        ctx.drawImage(hatImage, hatX, hatY, hatWidth, hatHeight);
+                        ctx.save();
+                        if (isFrontCamera) {
+                            // Для зеркального отображения шапки тоже
+                            ctx.translate(canvasWidth, 0);
+                            ctx.scale(-1, 1);
+                            ctx.drawImage(hatImage, canvasWidth - hatX - hatWidth, hatY, hatWidth, hatHeight);
+                        } else {
+                            ctx.drawImage(hatImage, hatX, hatY, hatWidth, hatHeight);
+                        }
+                        ctx.restore();
                     }
                 }
             }
             
             ctx.restore();
+            
+            // Запрашиваем следующий кадр
+            if (isRunning) {
+                animationId = requestAnimationFrame(() => {
+                    if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+                        faceMesh.send({image: video});
+                    }
+                });
+            }
         }
         
         // Функция для запуска обработки
@@ -218,16 +423,13 @@
             if (!isRunning) {
                 isRunning = true;
                 startButton.textContent = "ПАУЗА";
+                startButton.style.background = "#ff9900";
                 
-                if (!cameraInstance) {
-                    cameraInstance = new Camera(video, {
-                        onFrame: async () => {
-                            await faceMesh.send({image: video});
-                        },
-                        width: canvas.width,
-                        height: canvas.height
+                // Запускаем обработку кадров
+                if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+                    animationId = requestAnimationFrame(() => {
+                        faceMesh.send({image: video});
                     });
-                    await cameraInstance.start();
                 }
             }
         }
@@ -237,29 +439,40 @@
             if (isRunning) {
                 isRunning = false;
                 startButton.textContent = "СТАРТ";
-                if (cameraInstance) {
-                    cameraInstance.stop();
-                    cameraInstance = null;
+                startButton.style.background = "#ff0000";
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
                 }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
         }
         
         // Обработчики кнопок
         startMainButton.onclick = async () => {
             try {
-                // Скрываем стартовый экран
+                // Показываем индикатор загрузки
                 startScreen.style.display = 'none';
-                controlsDiv.style.display = 'block';
+                loading.style.display = 'block';
+                
+                // Даем время на отрисовку
+                await new Promise(resolve => setTimeout(resolve, 100));
                 
                 // Запускаем камеру
                 await startCamera();
+                
+                // Скрываем индикатор загрузки, показываем управление
+                loading.style.display = 'none';
+                controlsDiv.style.display = 'block';
                 
                 // Запускаем обработку
                 await startProcessing();
             } catch (err) {
                 // Если ошибка - показываем стартовый экран снова
+                loading.style.display = 'none';
                 startScreen.style.display = 'flex';
                 controlsDiv.style.display = 'none';
+                console.error("Ошибка запуска:", err);
             }
         };
         
@@ -280,27 +493,35 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             // Показываем стартовый экран
-            startScreen.style.display = 'flex';
             controlsDiv.style.display = 'none';
+            startScreen.style.display = 'flex';
             isRunning = false;
         };
         
         switchButton.onclick = async () => {
             try {
-                const facingMode = currentStream ?
-                    (currentStream.getVideoTracks()[0].getSettings().facingMode === 'user' ?
-                        'environment' : 'user') : 'user';
+                const facingMode = isFrontCamera ? 'environment' : 'user';
                 
                 // Останавливаем текущую обработку
                 stopProcessing();
                 
+                // Показываем загрузку
+                controlsDiv.style.display = 'none';
+                loading.style.display = 'block';
+                
                 // Переключаем камеру
                 await startCamera(facingMode);
+                
+                // Скрываем загрузку, показываем управление
+                loading.style.display = 'none';
+                controlsDiv.style.display = 'block';
                 
                 // Запускаем обработку снова
                 await startProcessing();
             } catch (err) {
                 console.error("Ошибка при переключении камеры:", err);
+                loading.style.display = 'none';
+                controlsDiv.style.display = 'block';
                 alert("Не удалось переключить камеру");
             }
         };
@@ -308,11 +529,35 @@
         // Обработка ошибок загрузки изображения шапки
         hatImage.onerror = () => {
             console.error("Ошибка загрузки изображения шапки");
+            // Создаем fallback изображение
+            hatImage.src = 'my_hat.png';
         };
         
-        // Убираем автозапуск при загрузке
-        // Теперь камера запускается только по нажатию кнопки
+        // Обработка изменения ориентации
+        window.addEventListener('resize', () => {
+            if (currentStream && video.videoWidth) {
+                const videoWidth = video.videoWidth;
+                const videoHeight = video.videoHeight;
+                
+                if (window.innerHeight > window.innerWidth) {
+                    canvas.width = Math.min(videoWidth, window.innerWidth);
+                    canvas.height = canvas.width * (videoHeight / videoWidth);
+                } else {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+            }
+        });
+        
+        // Предотвращаем стандартное поведение жестов
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+        
+        // Отключаем контекстное меню на длительное нажатие
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
     </script>
 </body>
 </html>
-
