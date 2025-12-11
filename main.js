@@ -29,7 +29,7 @@ const accessories = {
 
 // SVG аксессуары (если файлы не загрузятся)
 const accessorySVGs = {
-    hat1: `<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+    hat1: `<svg width="600" height="450" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <radialGradient id="hat1-grad" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" style="stop-color:#ff0000"/>
@@ -43,7 +43,7 @@ const accessorySVGs = {
         <circle cx="150" cy="30" r="15" fill="#ffcc00"/>
     </svg>`,
     
-    hat2: `<svg width="300" height="250" xmlns="http://www.w3.org/2000/svg">
+    hat2: `<svg width="600" height="500" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <radialGradient id="hat2-grad" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" style="stop-color:#00cc00"/>
@@ -58,7 +58,7 @@ const accessorySVGs = {
         <rect x="50" y="180" width="200" height="15" fill="white"/>
     </svg>`,
     
-    hat3: `<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    hat3: `<svg width="500" height="600" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <radialGradient id="beard-grad" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" style="stop-color:#f5f5dc"/>
