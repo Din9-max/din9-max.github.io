@@ -58,7 +58,7 @@ const accessorySVGs = {
         <rect x="50" y="180" width="200" height="15" fill="white"/>
     </svg>`,
     
-    beard: `<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+    hat3: `<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <radialGradient id="beard-grad" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" style="stop-color:#f5f5dc"/>
