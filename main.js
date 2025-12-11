@@ -23,7 +23,7 @@ let selectedAccessories = new Set(['hat1']);
 const accessories = {
     hat1: new Image(),
     hat2: new Image(),
-    beard: new Image(),
+    hat3: new Image(),
     mustache: new Image()
 };
 
